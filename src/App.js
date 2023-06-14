@@ -117,27 +117,25 @@ function Item({ item, onDeleteItem, onToggleItem }) {
 }
 
 function Stats({ items }) {
-  function itemsPacked(items) {
-    return items.filter((item) => item.packed === true).length;
-  }
+  if (!items.length)
+    return (
+      <footer className="stats">
+        <em>Start adding some items to your packing list</em>
+      </footer>
+    );
 
-  function itemsPackedPercent(items) {
-    const totalItemsPacked = itemsPacked(items);
-    const totalItems = items.length;
+  const totalItems = items.length;
+  const itemsPacked = items.filter((item) => item.packed === true).length;
 
-    const percentOfItemPacked = (totalItemsPacked / totalItems) * 100;
-    return percentOfItemPacked.toFixed(2);
-  }
+  const itemsPackedPercent = Math.round((itemsPacked / totalItems) * 100);
 
   return (
     <footer className="stats">
       <em>
-        {items.length !== 0
-          ? `💼 You have ${
-              items.length
-            } items on your list, and you already packed
-        ${itemsPacked(items)} (${itemsPackedPercent(items)}%)`
-          : "💼 You have no items on your list"}
+        {itemsPackedPercent === 100
+          ? "You got everything! Ready to go ✈️"
+          : `💼 You have ${items.length} items on your list, and you already packed
+        ${itemsPacked} (${itemsPackedPercent}%)`}
       </em>
     </footer>
   );
