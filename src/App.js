@@ -11,12 +11,24 @@ export default function App() {
     setItems((items) => items.filter((item) => item.id !== id));
   }
 
+  function handleToggleItem(id) {
+    setItems((items) =>
+      items.map((item) =>
+        item.id === id ? { ...item, packed: !item.packed } : item
+      )
+    );
+  }
+
   return (
     <div className="app">
       <Logo />
       <Form onAddItem={handleAddItem} />
-      <PackingList items={items} onDeleteItem={handleDeleteItem} />
-      <Stats />
+      <PackingList
+        items={items}
+        onDeleteItem={handleDeleteItem}
+        onToggleItem={handleToggleItem}
+      />
+      <Stats items={items} />
     </div>
   );
 }
@@ -71,37 +83,62 @@ function Form({ onAddItem }) {
   );
 }
 
-function PackingList({ items, onDeleteItem }) {
+function PackingList({ items, onDeleteItem, onToggleItem }) {
   return (
     <div className="list">
       <ul>
         {items.map((item) => (
-          <Item item={item} key={item.id} onDeleteItem={onDeleteItem} />
+          <Item
+            item={item}
+            key={item.id}
+            onDeleteItem={onDeleteItem}
+            onToggleItem={onToggleItem}
+          />
         ))}
       </ul>
     </div>
   );
 }
 
-function Item({ item, onDeleteItem }) {
-  function handleDeleteItem(id) {
-    onDeleteItem(id);
-  }
-
+function Item({ item, onDeleteItem, onToggleItem }) {
   return (
     <li>
+      <input
+        type="checkbox"
+        value={item.packed}
+        onChange={() => onToggleItem(item.id)}
+      />
       <span style={item.packed ? { textDecoration: "line-through" } : {}}>
         {item.quantity} {item.description}
-        <button onClick={() => handleDeleteItem(item.id)}>❌</button>
+        <button onClick={() => onDeleteItem(item.id)}>❌</button>
       </span>
     </li>
   );
 }
 
-function Stats() {
+function Stats({ items }) {
+  function itemsPacked(items) {
+    return items.filter((item) => item.packed === true).length;
+  }
+
+  function itemsPackedPercent(items) {
+    const totalItemsPacked = itemsPacked(items);
+    const totalItems = items.length;
+
+    const percentOfItemPacked = (totalItemsPacked / totalItems) * 100;
+    return percentOfItemPacked.toFixed(2);
+  }
+
   return (
     <footer className="stats">
-      <em>💼 You have X items on your list, and you already packed X (X%)</em>
+      <em>
+        {items.length !== 0
+          ? `💼 You have ${
+              items.length
+            } items on your list, and you already packed
+        ${itemsPacked(items)} (${itemsPackedPercent(items)}%)`
+          : "💼 You have no items on your list"}
+      </em>
     </footer>
   );
 }
